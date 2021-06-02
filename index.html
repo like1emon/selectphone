@@ -22,7 +22,8 @@
 
 <body>
     <div class="container" style="margin-top: 30px;">
-        <h2>手机号获取所属地信息</h2>
+        <h2>输入手机号</h2>
+        <h2>获取所属地信息</h2>
           <div class="form-group">
             <label for="phone">手机号码:</label>
             <input type="phone" class="form-control" id="phone" placeholder="请输入手机号">
@@ -85,7 +86,7 @@
             $('#zip').text(object.zip)
             },
             error:function(){
-                alert("fail")
+                alert("服务器异常了...")
             }
         })
         $('#tdphone').text(phone)
