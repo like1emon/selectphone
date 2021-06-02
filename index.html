@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <title>Document</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+  #result{
+      margin-top: 20px;
+  }
+</style>
+
+<body>
+    <div class="container" style="margin-top: 30px;">
+        <h2>通过手机号分析所属地信息</h2>
+          <div class="form-group">
+            <label for="phone">手机号码:</label>
+            <input type="phone" class="form-control" id="phone" placeholder="Enter phone">
+          </div>
+    
+          <button  class="btn btn-primary" id="submit">分析</button>
+          <button  class="btn btn-primary" id="reset">重置</button>
+
+      <div id="result">
+        <table class="table table-hover">
+            <tbody>
+              <tr>
+                <td><strong>手机号码段</strong></td>
+                <td class="let" id="tdphone"></td>
+              </tr>
+              <tr>
+                <td><strong>卡号归属地</strong></td>
+                <td class="let" id="province"></td>
+              </tr>
+              <tr>
+                <td><strong>运营商</strong></td>
+                <td class="let" id="company"></td>
+              </tr>
+              <tr>
+                <td><strong>区号</strong></td>
+                <td class="let" id="areacode"></td>
+              </tr><tr>
+                <td><strong>邮编</strong></td>
+                <td class="let" id="zip"></td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
+    </div>
+</body>
+<script>
+   $(document).ready(function(){
+    let counter = 0;
+    
+    $("#result").hide();
+     $("#submit").click(function(){
+        let phone = $('#phone').val()
+        var object = new Object();
+        $.ajax({/*用jsonp来解决无法跨域名的问题 */
+            type: "get",
+            async:true,
+            url:"http://apis.juhe.cn/mobile/get?phone="+phone+"&key=fcbc75e2fc61ed603c288e4295cc78ad",
+            dataType:'jsonp',
+            jsonp:"callback",
+            jsonpCallback:"photomessage",
+            success:function(json){
+            object.province = json.result.province + json.result.city + ''
+            object.company = json.result.company
+            object.areacode = json.result.areacode
+            object.zip = json.result.zip
+           
+            $('#province').text(object.province)
+            $('#company').text(object.company)
+            $('#areacode').text(object.areacode)
+            $('#zip').text(object.zip)
+            },
+            error:function(){
+                alert("fail")
+            }
+        })
+        $('#tdphone').text(phone)
+        $("#result").show(500);
+      
+  });
+  $('#reset').click(function(){
+    $('#phone').val(' ')
+    $('.let').text(' ')
+    $('#result').hide(500)
+  })
+});
+
+</script>
+</html>
