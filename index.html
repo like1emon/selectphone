@@ -8,31 +8,47 @@
     <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/popper.js/1.15.0/umd/popper.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    <title>手机号获取所属地信息</title>
+    <title>信息查询平台</title>
 </head>
 <style>
     *{
         margin: 0;
         padding: 0;
     }
-  #result{
+     #result{
       margin-top: 20px;
-  }
+    }
+    h2{
+     
+    }
+
 </style>
 
 <body>
-    <div class="container" style="margin-top: 30px;">
-        <h2>输入手机号</h2>
-        <h2>获取所属地信息</h2>
-          <div class="form-group">
-            <label for="phone">手机号码:</label>
-            <input type="phone" class="form-control" id="phone" placeholder="请输入手机号">
+ 
+
+    <div class="container" style="margin-top: 20px;">
+      <h2 style="margin-bottom: 40px;">信息查询平台</h2>
+      <div>
+        <div class="dropdown" style="margin-bottom: 20px;">
+          <button type="button" id="chooseContainer" class="btn btn-info dropdown-toggle" data-toggle="dropdown" style="width: 250px;text-align: left;">
+            通过手机号码查询所属地信息
+          </button>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="#" id="choosephone">通过手机号码查询所属地信息</a>
+            <a class="dropdown-item" href="#" id="chooseIp">通过ip地址查询所属地信息</a>
           </div>
-           <div>
-          <button  class="btn btn-primary" id="submit">分析</button>
+        </div>
+      </div>
+          <div class="form-group">
+            <label class="element">手机号码:</label>
+            <input  class="form-control" id="phone" placeholder="输入手机号码">
+          </div>
+    
+          <button  class="btn btn-warning" id="submit" style="color: white;">分析</button>
           <button  class="btn btn-primary" id="reset">重置</button>
-           </div>
-      <div id="result">
+
+      <div id="phoneResult">
         <table class="table table-hover">
             <tbody>
               <tr>
@@ -57,23 +73,75 @@
             </tbody>
           </table>
       </div>
+      <div id="IpResult">
+        <table class="table table-hover">
+            <tbody>
+              <tr>
+                <td><strong>IP地址</strong></td>
+                <td class="let" id="tdIp"></td>
+              </tr>
+              <tr>
+                <td><strong>国家</strong></td>
+                <td class="let" id="Country"></td>
+              </tr>
+              <tr>
+                <td><strong>省份</strong></td>
+                <td class="let" id="Province"></td>
+              </tr>
+              <tr>
+                <td><strong>城市</strong></td>
+                <td class="let" id="City"></td>
+              </tr><tr>
+                <td><strong>运营商</strong></td>
+                <td class="let" id="Isp"></td>
+              </tr>
+            </tbody>
+          </table>
+      </div>
     </div>
 </body>
 <script>
    $(document).ready(function(){
     let counter = 0;
-    
-    $("#result").hide();
+
+    $("#phoneResult").hide();
+    $("#IpResult").hide();
+    /* 选择了手机 */
+    $("#choosephone").click(function(){
+      const choosephone =  $("#choosephone").text()
+      $('#chooseContainer').text(choosephone)
+      $('.element').text("您想查找的手机号码")
+      $('.form-control').attr('placeholder','请输入手机号码')
+      $('.form-control').attr('id','phone')
+      $('.let').text(' ')
+      $("#IpResult").hide();
+      $('#phone').val('')
+    })
+    /* 选择了ip查询 */
+    $("#chooseIp").click(function(){
+      const chooseIp =  $("#chooseIp").text()
+      $('#chooseContainer').text(chooseIp)
+      $('.element').text("您想查找的IP地址")
+      $('.form-control').attr('id','Ip')
+      $('.form-control').attr('placeholder','请输入IP地址')
+      $('.let').text(' ')
+      $("#phoneResult").hide();
+      $('#Ip').val('')
+    })
+
      $("#submit").click(function(){
-        let phone = $('#phone').val()
+        
         var object = new Object();
+        var select = $('#chooseContainer').text()
+        if(select == "通过手机号码查询所属地信息"){
+        let phone = $('#phone').val()
         $.ajax({/*用jsonp来解决无法跨域名的问题 */
             type: "get",
             async:true,
-            url:"https://apis.juhe.cn/mobile/get?phone="+phone+"&key=fcbc75e2fc61ed603c288e4295cc78ad",
+            url:"http://apis.juhe.cn/mobile/get?phone="+phone+"&key=fcbc75e2fc61ed603c288e4295cc78ad",
             dataType:'jsonp',
             jsonp:"callback",
-            jsonpCallback:"photomessage",
+            jsonpCallback:"phonemessage",
             success:function(json){
             object.province = json.result.province + json.result.city + ''
             object.company = json.result.company
@@ -84,19 +152,47 @@
             $('#company').text(object.company)
             $('#areacode').text(object.areacode)
             $('#zip').text(object.zip)
+            $('#tdphone').text(phone)
+            $('#phoneResult').show(500)
             },
             error:function(){
-                alert("服务器异常了...")
+                alert("fail")
             }
         })
-        $('#tdphone').text(phone)
-        $("#result").show(500);
-      
+      }else if(select == "通过ip地址查询所属地信息"){
+        let Ip = $('#Ip').val()
+        $.ajax({
+            type: "get",
+            async:true,
+            url:"http://apis.juhe.cn/ip/ipNew?ip="+Ip+"&key=dc481115d628e27309227d8d01b816eb",
+            dataType:'jsonp',
+            jsonp:"callback",
+            jsonpCallback:"ipmessage",
+            success:function(json){
+            object.Province = json.result.Province
+            object.Isp = json.result.Isp
+            object.Country = json.result.Country
+            object.City = json.result.City
+            $('#Province').text(object.Province)
+            $('#Isp').text(object.Isp)
+            $('#Country').text(object.Country)
+            $('#City').text(object.City)
+            $('#tdIp').text(Ip)
+            $('#IpResult').show(500)
+            },
+            error:function(){
+                alert("fail")
+            }
+        })
+      }
+ 
   });
   $('#reset').click(function(){
-    $('#phone').val(' ')
-    $('.let').text(' ')
-    $('#result').hide(500)
+    $('#phone').val('')
+    $('#Ip').val('')
+    $('.let').text('')
+    $('#phoneResult').hide(500)
+    $('#IpResult').hide(500)
   })
 });
 
